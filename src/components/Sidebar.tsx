@@ -109,13 +109,13 @@ export function Sidebar({ currentPage, onNavigate, isOpen, onToggle }: SidebarPr
 
           {/* User info */}
           <Separator className="bg-slate-700" />
-          <div className="p-4">
-            <div className="flex items-center gap-3 overflow-hidden">
-              <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0">
-                <span>AP</span>
+          <div className={`${isOpen ? 'p-4 flex' : 'p-2 flex justify-center'}`}>
+            <div className={`flex items-center ${isOpen ? 'gap-3' : ''}`}>
+              <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0 transition-all duration-300">
+                <span className="text-sm font-medium">AP</span>
               </div>
               <div 
-                className={`flex-1 min-w-0 transition-opacity duration-300 ${
+                className={`flex-1 overflow-hidden transition-opacity duration-300 ${
                   isOpen ? 'opacity-100 delay-200' : 'opacity-0'
                 }`}
                 style={{ display: isOpen ? 'block' : 'none' }}

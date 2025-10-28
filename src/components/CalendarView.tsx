@@ -28,7 +28,8 @@ interface CalendarEvent {
 }
 
 export function CalendarView({ onNavigate }: CalendarViewProps) {
-  const [currentDate, setCurrentDate] = useState(new Date(2024, 10, 1)); // November 2024
+  const now = new Date();
+  const [currentDate, setCurrentDate] = useState(new Date(now.getFullYear(), now.getMonth(), 1));
   const [view, setView] = useState<'month' | 'week' | 'agenda'>('month');
   const [filterType, setFilterType] = useState('all');
   const [newEventOpen, setNewEventOpen] = useState(false);
@@ -40,7 +41,7 @@ export function CalendarView({ onNavigate }: CalendarViewProps) {
       title: 'Case Management',
       caseNo: 'WA-22NCVC-145/2024',
       type: 'hearing',
-      date: '2024-11-05',
+      date: '2025-11-05',
       time: '09:00 AM',
       location: 'High Court KL - Court 5.2',
       description: 'Tan Sri Lim v. ABC Corporation',
@@ -52,7 +53,7 @@ export function CalendarView({ onNavigate }: CalendarViewProps) {
       title: 'File Defence',
       caseNo: 'WA-22NCVC-145/2024',
       type: 'deadline',
-      date: '2024-11-08',
+      date: '2025-11-08',
       description: 'Submit Defence and Counterclaim',
       status: 'confirmed',
     },
@@ -62,7 +63,7 @@ export function CalendarView({ onNavigate }: CalendarViewProps) {
       title: 'Judicial Review Hearing',
       caseNo: 'JR-14NCC-278/2023',
       type: 'hearing',
-      date: '2024-11-12',
+      date: '2025-11-12',
       time: '02:30 PM',
       location: 'High Court Ipoh - Court 3.1',
       description: 'XYZ Sdn Bhd v. State Government',
@@ -74,7 +75,7 @@ export function CalendarView({ onNavigate }: CalendarViewProps) {
       title: 'Submit Bundle of Authorities',
       caseNo: 'CA-01(A)-89/2024',
       type: 'filing',
-      date: '2024-11-15',
+      date: '2025-11-15',
       description: 'File bundle 7 days before hearing',
       status: 'confirmed',
     },
@@ -84,7 +85,7 @@ export function CalendarView({ onNavigate }: CalendarViewProps) {
       title: 'Client Meeting',
       caseNo: 'WA-22NCVC-145/2024',
       type: 'meeting',
-      date: '2024-11-18',
+      date: '2025-11-18',
       time: '03:00 PM',
       location: 'Office - Conference Room A',
       description: 'Discuss trial strategy with Tan Sri Lim',
@@ -96,7 +97,7 @@ export function CalendarView({ onNavigate }: CalendarViewProps) {
       title: 'Affidavit Due',
       caseNo: 'WA-22NCVC-167/2024',
       type: 'deadline',
-      date: '2024-11-20',
+      date: '2025-11-20',
       description: 'Affidavit of Evidence in Chief',
       status: 'confirmed',
     },
@@ -106,7 +107,7 @@ export function CalendarView({ onNavigate }: CalendarViewProps) {
       title: 'Discovery Deadline',
       caseNo: 'JR-14NCC-278/2023',
       type: 'deadline',
-      date: '2024-11-22',
+      date: '2025-11-22',
       description: 'Complete discovery process',
       status: 'confirmed',
     },
@@ -116,7 +117,7 @@ export function CalendarView({ onNavigate }: CalendarViewProps) {
       title: 'Mention',
       caseNo: 'WA-22NCVC-189/2024',
       type: 'hearing',
-      date: '2024-11-25',
+      date: '2025-11-25',
       time: '09:30 AM',
       location: 'High Court KL - Court 4.1',
       description: 'Tech Innovations v. Former Employee',
@@ -128,7 +129,7 @@ export function CalendarView({ onNavigate }: CalendarViewProps) {
       title: 'Appeal Hearing',
       caseNo: 'CA-01(A)-89/2024',
       type: 'hearing',
-      date: '2024-12-01',
+      date: '2025-12-01',
       time: '10:00 AM',
       location: 'Court of Appeal Putrajaya',
       description: 'DG Immigration v. Ramesh Kumar',
@@ -163,22 +164,54 @@ export function CalendarView({ onNavigate }: CalendarViewProps) {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
   };
 
+  const previousWeek = () => {
+    const newDate = new Date(currentDate);
+    newDate.setDate(currentDate.getDate() - 7);
+    setCurrentDate(newDate);
+  };
+
+  const nextWeek = () => {
+    const newDate = new Date(currentDate);
+    newDate.setDate(currentDate.getDate() + 7);
+    setCurrentDate(newDate);
+  };
+
   const goToToday = () => {
     const now = new Date();
-    setCurrentDate(new Date(now.getFullYear(), now.getMonth(), 1));
+    if (view === 'month') {
+      setCurrentDate(new Date(now.getFullYear(), now.getMonth(), 1));
+    } else {
+      setCurrentDate(now);
+    }
   };
 
   const getWeekDates = (date: Date) => {
     const day = date.getDay();
     const diff = date.getDate() - day; // Get Sunday of current week
     const sunday = new Date(date.getFullYear(), date.getMonth(), diff);
-    const weekDates = [];
+    const weekDates: Date[] = [];
     for (let i = 0; i < 7; i++) {
       const weekDate = new Date(sunday);
       weekDate.setDate(sunday.getDate() + i);
       weekDates.push(weekDate);
     }
     return weekDates;
+  };
+
+  const getWeekRangeLabel = (date: Date) => {
+    const weekDates = getWeekDates(date);
+    const firstDay = weekDates[0];
+    const lastDay = weekDates[6];
+    
+    const formatDate = (d: Date) => {
+      return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+    };
+    
+    if (firstDay.getMonth() === lastDay.getMonth()) {
+      return `${firstDay.toLocaleDateString('en-US', { weekday: 'short' })}, ${formatDate(firstDay)} - ${lastDay.toLocaleDateString('en-US', { weekday: 'short' })}, ${formatDate(lastDay)}`;
+    } else {
+      return `${firstDay.toLocaleDateString('en-US', { weekday: 'short' })}, ${formatDate(firstDay)} - ${lastDay.toLocaleDateString('en-US', { weekday: 'short' })}, ${formatDate(lastDay)}`;
+    }
   };
 
   const today = new Date();
@@ -312,28 +345,41 @@ export function CalendarView({ onNavigate }: CalendarViewProps) {
       {/* View Controls */}
       <Card>
         <CardContent className="pt-6">
-          <div className="flex flex-col lg:flex-row gap-4 lg:items-center lg:justify-between">
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="icon" onClick={previousMonth}>
+          <div className="flex flex-col gap-4 lg:items-center lg:justify-between">
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 lg:pb-0">
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={view === 'week' ? previousWeek : previousMonth} 
+                className="flex-shrink-0"
+              >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <div className="min-w-[200px] text-center">
-                <h2 className="text-slate-900">{monthName}</h2>
+              <div className="min-w-[150px] sm:min-w-[200px] text-center flex-shrink-0">
+                <h2 className="text-base sm:text-lg text-slate-900">
+                  {view === 'week' ? getWeekRangeLabel(currentDate) : monthName}
+                </h2>
               </div>
-              <Button variant="outline" size="icon" onClick={nextMonth}>
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={view === 'week' ? nextWeek : nextMonth} 
+                className="flex-shrink-0"
+              >
                 <ChevronRight className="h-4 w-4" />
               </Button>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={goToToday}
+                className="flex-shrink-0"
               >
                 Today
               </Button>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Select value={filterType} onValueChange={setFilterType}>
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-full sm:w-[180px]">
                   <Filter className="h-4 w-4 mr-2" />
                   <SelectValue />
                 </SelectTrigger>
@@ -345,11 +391,11 @@ export function CalendarView({ onNavigate }: CalendarViewProps) {
                   <SelectItem value="meeting">Meetings</SelectItem>
                 </SelectContent>
               </Select>
-              <Tabs value={view} onValueChange={(v) => setView(v as 'month' | 'week' | 'agenda')}>
-                <TabsList>
-                  <TabsTrigger value="month">Month</TabsTrigger>
-                  <TabsTrigger value="week">Week</TabsTrigger>
-                  <TabsTrigger value="agenda">Agenda</TabsTrigger>
+              <Tabs value={view} onValueChange={(v) => setView(v as 'month' | 'week' | 'agenda')} className="w-full sm:w-auto">
+                <TabsList className="w-full sm:w-auto">
+                  <TabsTrigger value="month" className="flex-1 sm:flex-initial">Month</TabsTrigger>
+                  <TabsTrigger value="week" className="flex-1 sm:flex-initial">Week</TabsTrigger>
+                  <TabsTrigger value="agenda" className="flex-1 sm:flex-initial">Agenda</TabsTrigger>
                 </TabsList>
               </Tabs>
             </div>
@@ -360,19 +406,19 @@ export function CalendarView({ onNavigate }: CalendarViewProps) {
       {/* Calendar Views */}
       {view === 'month' && (
         <Card>
-          <CardContent className="pt-6">
+          <CardContent className="pt-6 overflow-x-auto">
             {/* Calendar Grid */}
-            <div className="grid grid-cols-7 gap-px bg-slate-200 border rounded-lg overflow-hidden">
+            <div className="min-w-[600px] grid grid-cols-7 gap-px bg-slate-200 border rounded-lg overflow-hidden">
               {/* Day headers */}
               {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-                <div key={day} className="bg-slate-100 p-2 text-center text-sm text-slate-600">
+                <div key={day} className="bg-slate-100 p-2 text-center text-xs sm:text-sm text-slate-600">
                   {day}
                 </div>
               ))}
               
               {/* Empty cells for days before month starts */}
               {Array.from({ length: startingDayOfWeek }).map((_, index) => (
-                <div key={`empty-${index}`} className="bg-white p-2 min-h-[120px]" />
+                <div key={`empty-${index}`} className="bg-white p-1 sm:p-2 min-h-[80px] sm:min-h-[100px] lg:min-h-[120px]" />
               ))}
               
               {/* Days of the month */}
@@ -388,9 +434,9 @@ export function CalendarView({ onNavigate }: CalendarViewProps) {
                 return (
                   <div
                     key={day}
-                    className={`bg-white p-2 min-h-[120px] ${isToday ? 'ring-2 ring-blue-600' : ''}`}
+                    className={`bg-white p-1 sm:p-2 min-h-[80px] sm:min-h-[100px] lg:min-h-[120px] ${isToday ? 'ring-2 ring-blue-600' : ''}`}
                   >
-                    <div className={`text-sm mb-2 ${isToday ? 'bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center' : 'text-slate-900'}`}>
+                    <div className={`text-xs sm:text-sm mb-1 sm:mb-2 ${isToday ? 'bg-blue-600 text-white rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center text-xs' : 'text-slate-900'}`}>
                       {day}
                     </div>
                     <div className="space-y-1">
@@ -398,14 +444,14 @@ export function CalendarView({ onNavigate }: CalendarViewProps) {
                         <button
                           key={event.id}
                           onClick={() => onNavigate({ type: 'matter', matterId: event.matterId })}
-                          className={`w-full text-left px-2 py-1 rounded text-xs truncate ${getEventTypeColor(event.type)}`}
+                          className={`w-full text-left px-1 sm:px-2 py-0.5 sm:py-1 rounded text-[10px] sm:text-xs truncate ${getEventTypeColor(event.type)}`}
                         >
-                          {event.time && <span className="mr-1">{event.time}</span>}
+                          <span className="hidden sm:inline">{event.time && <span className="mr-1">{event.time}</span>}</span>
                           {event.title}
                         </button>
                       ))}
                       {dayEvents.length > 3 && (
-                        <div className="text-xs text-slate-500 px-2">
+                        <div className="text-[10px] sm:text-xs text-slate-500 px-1 sm:px-2">
                           +{dayEvents.length - 3} more
                         </div>
                       )}
@@ -420,18 +466,18 @@ export function CalendarView({ onNavigate }: CalendarViewProps) {
 
       {view === 'week' && (
         <Card>
-          <CardContent className="pt-6">
-            <div className="space-y-4">
+          <CardContent className="pt-6 overflow-x-auto">
+            <div className="min-w-[600px] space-y-4">
               {/* Week header */}
-              <div className="grid grid-cols-7 gap-2">
+              <div className="grid grid-cols-7 gap-1 sm:gap-2">
                 {getWeekDates(currentDate).map((weekDate, index) => {
                   const isToday = weekDate.getTime() === today.getTime();
                   return (
                     <div key={index} className="text-center">
-                      <div className="text-sm text-slate-600">
+                      <div className="text-xs sm:text-sm text-slate-600">
                         {weekDate.toLocaleDateString('en-US', { weekday: 'short' })}
                       </div>
-                      <div className={`text-2xl mt-1 ${isToday ? 'bg-blue-600 text-white rounded-full w-10 h-10 flex items-center justify-center mx-auto' : 'text-slate-900'}`}>
+                      <div className={`text-lg sm:text-2xl mt-1 ${isToday ? 'bg-blue-600 text-white rounded-full w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center mx-auto' : 'text-slate-900'}`}>
                         {weekDate.getDate()}
                       </div>
                     </div>
@@ -440,23 +486,23 @@ export function CalendarView({ onNavigate }: CalendarViewProps) {
               </div>
 
               {/* Week events */}
-              <div className="grid grid-cols-7 gap-2">
+              <div className="grid grid-cols-7 gap-1 sm:gap-2">
                 {getWeekDates(currentDate).map((weekDate, index) => {
                   const dayEvents = getEventsForDate(weekDate).filter(event => 
                     filterType === 'all' || event.type === filterType
                   );
                   return (
-                    <div key={index} className="border rounded-lg p-2 min-h-[300px] bg-white">
-                      <div className="space-y-2">
+                    <div key={index} className="border rounded-lg p-1 sm:p-2 min-h-[120px] sm:min-h-[150px] lg:min-h-[180px] bg-white">
+                      <div className="space-y-1 sm:space-y-2">
                         {dayEvents.map((event) => (
                           <button
                             key={event.id}
                             onClick={() => onNavigate({ type: 'matter', matterId: event.matterId })}
-                            className={`w-full text-left px-2 py-2 rounded text-xs ${getEventTypeColor(event.type)}`}
+                            className={`w-full text-left px-1 sm:px-2 py-1 sm:py-2 rounded text-[10px] sm:text-xs ${getEventTypeColor(event.type)}`}
                           >
                             <div className="font-medium truncate">{event.title}</div>
-                            {event.time && <div className="text-xs opacity-90 mt-1">{event.time}</div>}
-                            <div className="text-xs opacity-90 mt-1 truncate">{event.caseNo}</div>
+                            {event.time && <div className="text-[9px] sm:text-xs opacity-90 mt-0.5 sm:mt-1">{event.time}</div>}
+                            <div className="text-[9px] sm:text-xs opacity-90 mt-0.5 sm:mt-1 truncate">{event.caseNo}</div>
                           </button>
                         ))}
                       </div>
@@ -482,52 +528,52 @@ export function CalendarView({ onNavigate }: CalendarViewProps) {
               {sortedEvents.map((event) => (
                 <Card key={event.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="pt-4">
-                    <div className="flex gap-4">
+                    <div className="flex gap-2 sm:gap-4">
                       {/* Date */}
-                      <div className="flex flex-col items-center w-16 flex-shrink-0">
-                        <div className="text-2xl text-blue-600">
+                      <div className="flex flex-col items-center w-12 sm:w-16 flex-shrink-0">
+                        <div className="text-xl sm:text-2xl text-blue-600">
                           {new Date(event.date).getDate()}
                         </div>
-                        <div className="text-xs text-slate-600">
+                        <div className="text-[10px] sm:text-xs text-slate-600">
                           {new Date(event.date).toLocaleDateString('en-US', { month: 'short' })}
                         </div>
-                        <div className="text-xs text-slate-500">
+                        <div className="text-[10px] sm:text-xs text-slate-500">
                           {new Date(event.date).getFullYear()}
                         </div>
                       </div>
 
                       {/* Details */}
-                      <div className="flex-1 space-y-2">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1">
+                      <div className="flex-1 min-w-0 space-y-2">
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
                             <button
                               onClick={() => onNavigate({ type: 'matter', matterId: event.matterId })}
                               className="text-blue-600 hover:text-blue-800 hover:underline"
                             >
-                              <h4>{event.title}</h4>
+                              <h4 className="text-sm sm:text-base">{event.title}</h4>
                             </button>
-                            <p className="text-sm text-slate-600">{event.caseNo}</p>
+                            <p className="text-xs sm:text-sm text-slate-600 truncate">{event.caseNo}</p>
                           </div>
-                          <Badge className={getEventTypeColor(event.type)}>
+                          <Badge className={`${getEventTypeColor(event.type)} flex-shrink-0 text-[10px] sm:text-xs`}>
                             {getEventTypeLabel(event.type)}
                           </Badge>
                         </div>
                         
                         {event.description && (
-                          <p className="text-sm text-slate-700">{event.description}</p>
+                          <p className="text-xs sm:text-sm text-slate-700">{event.description}</p>
                         )}
                         
-                        <div className="flex flex-wrap gap-3 text-sm text-slate-600">
+                        <div className="flex flex-wrap gap-2 sm:gap-3 text-xs sm:text-sm text-slate-600">
                           {event.time && (
                             <div className="flex items-center gap-1">
                               <Clock className="h-3 w-3" />
-                              {event.time}
+                              <span className="text-xs">{event.time}</span>
                             </div>
                           )}
                           {event.location && (
                             <div className="flex items-center gap-1">
                               <MapPin className="h-3 w-3" />
-                              {event.location}
+                              <span className="text-xs truncate max-w-[150px] sm:max-w-none">{event.location}</span>
                             </div>
                           )}
                         </div>

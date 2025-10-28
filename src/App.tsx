@@ -39,14 +39,15 @@ export default function App() {
   };
 
   return (
-    <div className="flex h-screen bg-slate-50">
+    <div className="flex h-screen bg-slate-50 overflow-hidden">
       <Sidebar 
         currentPage={currentPage} 
         onNavigate={setCurrentPage}
         isOpen={sidebarOpen}
         onToggle={() => setSidebarOpen(!sidebarOpen)}
       />
-      <main className={`flex-1 overflow-auto transition-all duration-300 ${sidebarOpen ? 'lg:ml-64' : 'lg:ml-16'}`}>
+      <main className={`flex-1 overflow-auto transition-all duration-300 min-w-0`}
+      style={{ marginLeft: sidebarOpen ? '16rem' : '4rem' }}>
         {renderPage()}
       </main>
     </div>
